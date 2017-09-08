@@ -134,23 +134,25 @@ var map = d3.select("body").append("div")
     .style("height", height + "px")
     .call(zoom);
 
-var svg = map.append("div")
+var svgParent = map.append("div")
     .attr("class", "layer")
-    .append("svg").attr("id","map").append("g");
+    .append("svg").attr("id","map");
+
+var svg = svgParent.append("g");
 
 var nakagyo = d3.json("./kyoto_city_nakagyo.geojson", function(json) {
-  return svg.append("g")
+  return svgParent.append("g")
             .attr("class", "nakagyo")
-            .selectAll("path-nakagyo")
+            .selectAll("path")
             .data(json.features)
             .enter()
-            .append("path-nakagyo")
+            .append("path")
             .attr("d", tilePath)  //dataに投影法を適応
             .attr("fill-opacity", 0.5)
             .attr("fill", "green")
             .attr("stroke", "#222");
    });
-console.log("abc 1");
+console.log("abc 2");
 
 var zoom_controls = map.append("div")
     .attr("class", "zoom-container");
