@@ -201,18 +201,18 @@ function zoomed() {
       .attr("transform",function(d){ return "translate("+ d[0] * 256 +","+ d[1] * 256 +")"; })
       .each(renderTiles);
     
-//   var nakagyo = d3.json("./kyoto_city_nakagyo.geojson", function(json) {
-//   return image.append("g")
-//             .attr("class", "nakagyo")
-//             .selectAll("path")
-//             .data(json.features)
-//             .enter()
-//             .append("path")
-//             .attr("d", tilePath)  //dataに投影法を適応
-//             .attr("fill-opacity", 0.5)
-//             .attr("fill", "green")
-//             .attr("stroke", "#222");
-//    });
+  var nakagyo = d3.json("./kyoto_city_nakagyo.geojson", function(json) {
+  return image.append("g")
+            .attr("class", "nakagyo")
+            .selectAll("path")
+            .data(json.features)
+            .enter()
+            .append("path")
+            .attr("d", tilePath)  //dataに投影法を適応
+            .attr("fill-opacity", 0.5)
+            .attr("fill", "green")
+            .attr("stroke", "#222");
+   });
 }
 
 var download = d3.select("#exportify")
