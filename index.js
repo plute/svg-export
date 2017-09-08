@@ -152,7 +152,7 @@ var nakagyo = d3.json("./kyoto_city_nakagyo.geojson", function(json) {
             .attr("fill", "green")
             .attr("stroke", "#222");
    });
-console.log("abc 4");
+console.log("abc 5");
 
 var zoom_controls = map.append("div")
     .attr("class", "zoom-container");
