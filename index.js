@@ -139,8 +139,7 @@ var svg = map.append("div")
     .append("svg").attr("id","map").append("g");
 
  var nakagyo = d3.json("./kyoto_city_nakagyo.geojson", function(json) {
-  return svg.append("svg:g")
-            .attr("class", "nakagyo")
+  return svg.attr("class", "nakagyo")
             .selectAll("path")
             .data(json.features)
             .enter()
