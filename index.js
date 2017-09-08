@@ -204,10 +204,10 @@ function zoomed() {
   var nakagyo = d3.json("./kyoto_city_nakagyo.geojson", function(json) {
   return image.append("g")
             .attr("class", "nakagyo")
-            .selectAll("path")
+            .selectAll("path-nakagyo")
             .data(json.features)
             .enter()
-            .append("path")
+            .append("path-nakagyo")
             .attr("d", tilePath)  //dataに投影法を適応
             .attr("fill-opacity", 0.5)
             .attr("fill", "green")
