@@ -29,7 +29,7 @@ var layers = [
     ];
 
 //default origin of the map
-var origin = [-118.2437, 34.0522, 13];
+var origin = [135.7547327, 34.9977323, 13];
 if (window.location.hash) {
   origin = window.location.hash.slice(1)
     .split("/").map(function(n){ return Number(n); });
@@ -137,6 +137,19 @@ var map = d3.select("body").append("div")
 var svg = map.append("div")
     .attr("class", "layer")
     .append("svg").attr("id","map").append("g");
+
+   var nakagyo = d3.json("./kyoto_city_nakagyo.geojson, function(json) {
+  return svg.append("svg:g")
+            .attr("class", "nakagyo")
+            .selectAll("path")
+            .data(json.features)
+            .enter()
+            .append("svg:path")
+            .attr("d", path)  //dataに投影法を適応
+            .attr("fill-opacity", 0.5)
+            .attr("fill", "green")
+            .attr("stroke", "#222");
+});
 
 var zoom_controls = map.append("div")
     .attr("class", "zoom-container");
@@ -425,7 +438,6 @@ function exportify() {
     .attr("width",width).attr("height",height)
     .attr("style","position:absolute; top: 10000px; left: 10000px;")
     .attr("id","svg-download");
-
 
     var tiles = tile.scale(zoom.scale()).translate(zoom.translate())(),
       top = tiles[0],
