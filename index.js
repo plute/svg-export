@@ -145,7 +145,7 @@ var svg = map.append("div")
             .data(json.features)
             .enter()
             .append("svg:path")
-            .attr("d", path)  //dataに投影法を適応
+            .attr("d", tilePath)  //dataに投影法を適応
             .attr("fill-opacity", 0.5)
             .attr("fill", "green")
             .attr("stroke", "#222");
