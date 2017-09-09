@@ -29,7 +29,7 @@ var layers = [
     ];
 
 //default origin of the map
-var origin = [-118.2437, 34.0522, 13];
+var origin = [135.7547327, 34.9977323, 13];
 if (window.location.hash) {
   origin = window.location.hash.slice(1)
     .split("/").map(function(n){ return Number(n); });
@@ -41,7 +41,7 @@ function createControls () {
     entering = layerToggle.enter().append("li").attr("class","layer-name");
     entering.append("input").attr("type","checkbox");
     entering.append("span").text(function(d){ return d.layer; });
-    entering.append("span").attr("class","toggle").text("toggle all");
+    entering.append("span").attr("class","toggle btn btn-transparent").text("toggle all");
 
     layerToggle.select(".toggle")
       .style("display",function(d){ return (d.display && d.types.length) ? "block" : "none"; })
@@ -53,7 +53,7 @@ function createControls () {
         createControls();
         d3.selectAll(".tile").each(renderTiles);
       });
-    
+
     layerToggle.select("input")
       .property("checked",function(d){ return d.display; })
       .on("change",function(d){
@@ -65,9 +65,9 @@ function createControls () {
       });
 
     var types = layerToggle.selectAll(".type")
-      .data(function(d){ 
+      .data(function(d){
         if (!d.display) return [];
-        return d.types.filter(function(e){ return e.visible; }); 
+        return d.types.filter(function(e){ return e.visible; });
       });
     var enterTypes = types.enter().append("p").attr("class","type");
     enterTypes.append("input").attr("type","checkbox");
@@ -134,9 +134,25 @@ var map = d3.select("body").append("div")
     .style("height", height + "px")
     .call(zoom);
 
-var svg = map.append("div")
+var svgParent = map.append("div")
     .attr("class", "layer")
-    .append("svg").attr("id","map").append("g");
+    .append("svg").attr("id","map");
+
+var svg = svgParent.append("g");
+
+// var nakagyo = d3.json("./kyoto_city_nakagyo.geojson", function(json) {
+//   return svgParent.append("g")
+//             .attr("class", "nakagyo")
+//             .selectAll("path")
+//             .data(json.features)
+//             .enter()
+//             .append("path")
+//             .attr("d", tilePath)  //dataに投影法を適応
+//             .attr("fill-opacity", 0.5)
+//             .attr("fill", "green")
+//             .attr("stroke", "#222");
+//    });
+console.log("abc 6");
 
 var zoom_controls = map.append("div")
     .attr("class", "zoom-container");
@@ -182,7 +198,7 @@ function zoomed() {
   var zoomLevel = tiles[0][2],
   mapCenter = projection.invert([width/2, height/2]);
 
-  // adding zoom level as a class  
+  // adding zoom level as a class
   d3.select(".layer").attr("class",function(){ return "layer z"+zoomLevel; });
   // url hash for the location
   window.location.hash = [mapCenter[0].toFixed(5), mapCenter[1].toFixed(5), zoomLevel].join("/");
@@ -200,6 +216,17 @@ function zoomed() {
       .attr("class", "tile")
       .attr("transform",function(d){ return "translate("+ d[0] * 256 +","+ d[1] * 256 +")"; })
       .each(renderTiles);
+    
+//   nakagyo.attr("transform", matrix3d(zoom.scale(), zoom.translate()));
+    
+    //aaa/
+    
+    
+    //aaaa////
+    
+    
+    
+    ///aaaa
 }
 
 var download = d3.select("#exportify")
@@ -212,7 +239,7 @@ function sortData(thorough) {
   var mapData = d3.select("svg").selectAll("path").data();
   var t = d3.nest()
     .key(function(d){ return d.layer_name; })
-    .key(function(d){ 
+    .key(function(d){
       var kind = d.properties.kind;
       if (thorough && d.properties.boundary=='yes')
         kind += '_boundary';
@@ -229,7 +256,7 @@ function sortFeatures() {
     var layerIndex;
     layers.forEach(function(d,i){ if (d.layer == l.key) layerIndex = i; });
     var currentTypes = l.values.map(function(d){ return d.key; });
-    
+
     layers[layerIndex].types.forEach(function(d,i){ d.visible = false; });
 
     l.values.forEach(function(f){
@@ -247,85 +274,6 @@ function sortFeatures() {
   });
 
   createControls();
-}
-
-//process the page's data and download as an .svg
-function exportify() {
-
-  var featureTypes = sortData(true);
-
-  featureTypes.forEach(function(l){
-    var featureData;
-    layers.forEach(function(t){ if (t.layer == l.key) featureData = t.types; });
-    if (!featureData) return;
-    featureData.forEach(function(t){
-      if (!t.display) {
-        l.values.forEach(function(f,i){ if (f.key == t.type || f.key == t.type+"_boundary") l.values.splice(i,1); })
-      }
-    });
-  });
-
-  var svg2 = map.append("svg")
-    .attr("width",width).attr("height",height)
-    .attr("style","position:absolute; top: 10000px; left: 10000px;")
-    .attr("id","svg-download");
-
-
-    var tiles = tile.scale(zoom.scale()).translate(zoom.translate())(),
-      top = tiles[0],
-      k = Math.pow(2, top[2]) * 256; // size of the world in pixels
-
-    tilePath.projection()
-        .translate([k / 2 - top[0] * 256, k / 2 - top[1] * 256]) // [0°,0°] in pixels
-        .scale(k / 2 / Math.PI)
-        .precision(0);
-
-    var featureList = ["svg", "tile"];
-
-    var layerType = svg2.selectAll(".tile").data(featureTypes);
-    layerType.enter().append("g").attr("class","tile").attr("id",function(d){ return d.key; });
-    layerType.exit().remove();
-
-    var features = layerType.selectAll(".feature-type")
-      .data(function(d){ return d.values; });
-    features.enter().append("g").attr("class","feature-type");
-    features.attr("id",function(d){ featureList.push(d.key.replace("_","-")); return d.key; });
-    features.exit().remove();
-
-    var paths = features.selectAll("path").data(function(d){ return d.values; });
-    paths.enter().append("path");
-    paths.exit().remove();
-    paths.attr("class", function(d) {
-        var kind = d.properties.kind || '',
-          kind = kind.replace("_","-");
-        if(d.properties.boundary=='yes')
-          {kind += '_boundary';} 
-        return d.layer_name + '-layer ' + kind; })
-      .attr("d", tilePath);
-
-  //messy way of finding the applicable css styles and inserting them into the file
-  var addStyles = [];
-  for( var i in document.styleSheets ){
-    if(document.styleSheets[i].href && document.styleSheets[i].cssRules) {
-      var rules = document.styleSheets[i].cssRules;
-      for (var r in rules) {
-        var cssText = rules[r].cssText;
-        featureList.forEach(function(f){
-          if (cssText && cssText.indexOf(f) != -1)
-            addStyles.push(cssText);
-        })
-      };
-    }
-  }
-
-  var styleTag = '<style type="text/css">' + addStyles.join("\n") + "</style>"
-
-  var svgText = '<svg xmlns="http://www.w3.org/2000/svg">' + styleTag + "<svg>" + document.getElementById("svg-download").innerHTML + "</svg></svg>";
-  var blob = new Blob([svgText], {type: 'text/xml'});
-  var url = URL.createObjectURL(blob);
-  downloadA.href = url;
-
-  svg2.remove();
 }
 
 function matrix3d(scale, translate) {
@@ -408,9 +356,9 @@ if (('ontouchstart' in window) || (window.DocumentTouch && document instanceof D
 // initialize mapzen bug
 var mzBug = new MapzenBug({
   name: window.bugTitle,
-  link: 'https://github.com/mapzen/d3-vector-tiles',
-  tweet: 'A D3 vector map demo from @mapzen',
-  repo: 'https://github.com/mapzen/d3-vector-tiles'
+  link: 'https://github.com/mapzen/svg-export',
+  tweet: 'An SVG map download tool from @mapzen',
+  repo: 'https://github.com/mapzen/svg-export'
 });
 
 function renderTiles(d) {
@@ -420,19 +368,19 @@ function renderTiles(d) {
 
   var svg = d3.select(this);
   var zoom = d[2];
-  this._xhr = d3.json("https://vector.mapzen.com/osm/"+requestLayers+"/" + zoom + "/" + d[0] + "/" + d[1] + ".topojson?api_key=vector-tiles-LM25tq4", function(error, json) {
+  this._xhr = d3.json("https://tile.mapzen.com/mapzen/vector/v1/"+requestLayers+"/" + zoom + "/" + d[0] + "/" + d[1] + ".topojson?api_key=vector-tiles-LM25tq4", function(error, json) {
     var k = Math.pow(2, d[2]) * 256; // size of the world in pixels
 
     tilePath.projection()
         .translate([k / 2 - d[0] * 256, k / 2 - d[1] * 256]) // [0°,0°] in pixels
         .scale(k / 2 / Math.PI)
         .precision(0);
-    
+
     var data = {};
     for (var key in json.objects) {
       data[key] = topojson.feature(json, json.objects[key]);
     }
-  
+
     // build up a single concatenated array of all tile features from all tile layers
     var features = [];
     layers.forEach(function(l){
@@ -466,10 +414,10 @@ function renderTiles(d) {
         }
       }
     });
-    
+
     // put all the features into SVG paths
     var paths = svg.selectAll("path")
-      .data(features.sort(function(a, b) { 
+      .data(features.sort(function(a, b) {
         return a.properties.sort_key ? a.properties.sort_key - b.properties.sort_key : 0 }));
     paths.enter().append("path");
     paths.exit().remove();
@@ -477,9 +425,87 @@ function renderTiles(d) {
         var kind = d.properties.kind || '',
           kind = kind.replace("_","-");
         if(d.properties.boundary=='yes')
-          {kind += '_boundary';} 
+          {kind += '_boundary';}
         return d.layer_name + '-layer ' + kind; })
       .attr("d", tilePath)
       .style("display",function(d){ return d.display ? "block" : "none"; });
   });
-};
+}
+
+//process the page's data and download as an .svg
+function exportify() {
+
+  var featureTypes = sortData(true);
+
+  featureTypes.forEach(function(l){
+    var featureData;
+    layers.forEach(function(t){ if (t.layer == l.key) featureData = t.types; });
+    if (!featureData) return;
+    featureData.forEach(function(t){
+      if (!t.display) {
+        l.values.forEach(function(f,i){ if (f.key == t.type || f.key == t.type+"_boundary") l.values.splice(i,1); })
+      }
+    });
+  });
+
+  var svg2 = map.append("svg")
+    .attr("width",width).attr("height",height)
+    .attr("style","position:absolute; top: 10000px; left: 10000px;")
+    .attr("id","svg-download");
+
+    var tiles = tile.scale(zoom.scale()).translate(zoom.translate())(),
+      top = tiles[0],
+      k = Math.pow(2, top[2]) * 256; // size of the world in pixels
+
+    tilePath.projection()
+        .translate([k / 2 - top[0] * 256, k / 2 - top[1] * 256]) // [0°,0°] in pixels
+        .scale(k / 2 / Math.PI)
+        .precision(0);
+
+    var featureList = ["svg", "tile"];
+
+    var layerType = svg2.selectAll(".tile").data(featureTypes);
+    layerType.enter().append("g").attr("class","tile").attr("id",function(d){ return d.key; });
+    layerType.exit().remove();
+
+    var features = layerType.selectAll(".feature-type")
+      .data(function(d){ return d.values; });
+    features.enter().append("g").attr("class","feature-type");
+    features.attr("id",function(d){ featureList.push(d.key.replace("_","-")); return d.key; });
+    features.exit().remove();
+
+    var paths = features.selectAll("path").data(function(d){ return d.values; });
+    paths.enter().append("path");
+    paths.exit().remove();
+    paths.attr("class", function(d) {
+        var kind = d.properties.kind || '',
+          kind = kind.replace("_","-");
+        if(d.properties.boundary=='yes')
+          {kind += '_boundary';}
+        return d.layer_name + '-layer ' + kind; })
+      .attr("d", tilePath);
+
+  //messy way of finding the applicable css styles and inserting them into the file
+  var addStyles = [];
+  for( var i in document.styleSheets ){
+    if(document.styleSheets[i].href && document.styleSheets[i].cssRules) {
+      var rules = document.styleSheets[i].cssRules;
+      for (var r in rules) {
+        var cssText = rules[r].cssText;
+        featureList.forEach(function(f){
+          if (cssText && cssText.indexOf(f) != -1)
+            addStyles.push(cssText);
+        })
+      };
+    }
+  }
+
+  var styleTag = '<style type="text/css">' + addStyles.join("\n") + "</style>"
+
+  var svgText = '<svg xmlns="http://www.w3.org/2000/svg">' + styleTag + "<svg>" + document.getElementById("svg-download").innerHTML + "</svg></svg>";
+  var blob = new Blob([svgText], {type: 'text/xml'});
+  var url = URL.createObjectURL(blob);
+  downloadA.href = url;
+
+  svg2.remove();
+}
