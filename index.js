@@ -140,18 +140,18 @@ var svgParent = map.append("div")
 
 var svg = svgParent.append("g");
 
-var nakagyo = d3.json("./kyoto_city_nakagyo.geojson", function(json) {
-  return svgParent.append("g")
-            .attr("class", "nakagyo")
-            .selectAll("path")
-            .data(json.features)
-            .enter()
-            .append("path")
-            .attr("d", tilePath)  //dataに投影法を適応
-            .attr("fill-opacity", 0.5)
-            .attr("fill", "green")
-            .attr("stroke", "#222");
-   });
+// var nakagyo = d3.json("./kyoto_city_nakagyo.geojson", function(json) {
+//   return svgParent.append("g")
+//             .attr("class", "nakagyo")
+//             .selectAll("path")
+//             .data(json.features)
+//             .enter()
+//             .append("path")
+//             .attr("d", tilePath)  //dataに投影法を適応
+//             .attr("fill-opacity", 0.5)
+//             .attr("fill", "green")
+//             .attr("stroke", "#222");
+//    });
 console.log("abc 6");
 
 var zoom_controls = map.append("div")
@@ -217,7 +217,16 @@ function zoomed() {
       .attr("transform",function(d){ return "translate("+ d[0] * 256 +","+ d[1] * 256 +")"; })
       .each(renderTiles);
     
-  nakagyo.attr("transform", matrix3d(zoom.scale(), zoom.translate()));
+//   nakagyo.attr("transform", matrix3d(zoom.scale(), zoom.translate()));
+    
+    //aaa/
+    
+    
+    //aaaa////
+    
+    
+    
+    ///aaaa
 }
 
 var download = d3.select("#exportify")
